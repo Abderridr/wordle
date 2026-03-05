@@ -2,7 +2,7 @@
   "name": "وردل عربي",
   "short_name": "وردل",
   "description": "لعبة وردل باللغة العربية",
-  "start_url": "/arabic-wordle/",
+  "start_url": "/wordle/",
   "display": "standalone",
   "background_color": "#0f0f14",
   "theme_color": "#c9a84c",
