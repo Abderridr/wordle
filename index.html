@@ -304,6 +304,13 @@
     .key.wide { min-width: 50px; }
   }
 </style>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c9a84c">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
 </head>
 <body>
 
