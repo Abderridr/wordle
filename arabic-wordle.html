@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>وردل عربي</title>
+<link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f14;
+    --surface: #1a1a24;
+    --border: #2e2e42;
+    --text: #f0ede8;
+    --muted: #6b6880;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --correct: #4a9a6a;
+    --present: #c9a84c;
+    --absent: #2e2e42;
+    --key-bg: #252535;
+    --tile-size: 64px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.08) 0%, transparent 70%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* HEADER */
+  header {
+    width: 100%;
+    max-width: 520px;
+    padding: 20px 20px 0;
+    text-align: center;
+    position: relative;
+  }
+
+  .logo-ornament {
+    font-family: 'Scheherazade New', serif;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 6px;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    font-family: 'Scheherazade New', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--gold-light);
+    text-shadow: 0 0 30px rgba(201,168,76,0.3);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.3;
+    margin-bottom: 16px;
+  }
+
+  /* STATS */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .stat span { color: var(--gold-light); font-weight: 700; font-size: 18px; display: block; text-align: center; }
+
+  /* MESSAGE */
+  #message {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    transition: opacity 0.3s;
+  }
+
+  /* GRID */
+  #grid {
+    display: grid;
+    grid-template-rows: repeat(6, var(--tile-size));
+    gap: 6px;
+    margin-bottom: 20px;
+    padding: 0 20px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(5, var(--tile-size));
+    gap: 6px;
+  }
+
+  .tile {
+    width: var(--tile-size);
+    height: var(--tile-size);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cairo', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color 0.15s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tile.filled {
+    border-color: var(--muted);
+    animation: pop 0.1s ease;
+  }
+
+  .tile.correct {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: #fff;
+    animation: flip 0.5s ease forwards;
+  }
+
+  .tile.present {
+    background: var(--present);
+    border-color: var(--present);
+    color: #fff;
+    animation: flip 0.5s ease forwards;
+  }
+
+  .tile.absent {
+    background: var(--absent);
+    border-color: var(--absent);
+    color: var(--muted);
+    animation: flip 0.5s ease forwards;
+  }
+
+  .tile.shake { animation: shake 0.5s ease; }
+  .tile.bounce { animation: bounce 0.5s ease; }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes flip {
+    0% { transform: rotateX(0); }
+    50% { transform: rotateX(-90deg); opacity: 0.5; }
+    100% { transform: rotateX(0); }
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    30% { transform: translateY(-14px); }
+    60% { transform: translateY(-6px); }
+  }
+
+  /* KEYBOARD */
+  #keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 12px 24px;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .kb-row {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .key {
+    height: 52px;
+    min-width: 40px;
+    padding: 0 6px;
+    border-radius: 8px;
+    border: none;
+    background: var(--key-bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, color 0.2s;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .key:active { transform: scale(0.94); }
+  .key.wide { min-width: 60px; font-size: 13px; }
+
+  .key.correct { background: var(--correct); color: #fff; border-color: var(--correct); }
+  .key.present { background: var(--present); color: #fff; border-color: var(--present); }
+  .key.absent { background: #1a1a1a; color: #444; border-color: #1a1a1a; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 28px;
+    max-width: 340px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.1);
+    animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes modalIn {
+    from { transform: scale(0.8) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .modal-icon { font-size: 48px; margin-bottom: 12px; }
+  .modal h2 { font-size: 22px; color: var(--gold-light); margin-bottom: 8px; }
+  .modal p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+  .modal .answer-reveal {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+  .modal .answer-reveal span {
+    font-family: 'Scheherazade New', serif;
+    font-size: 28px;
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+  .modal .answer-def {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .btn-play-again {
+    background: var(--gold);
+    color: #0f0f14;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    width: 100%;
+  }
+  .btn-play-again:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+  @media (max-width: 400px) {
+    :root { --tile-size: 52px; }
+    h1 { font-size: 32px; }
+    .key { height: 44px; min-width: 33px; font-size: 14px; }
+    .key.wide { min-width: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-ornament">✦ لعبة ✦</div>
+  <h1>وردَل عربي</h1>
+  <div class="subtitle">خمّن الكلمة في ٦ محاولات</div>
+  <div class="divider"></div>
+  <div class="stats-bar">
+    <div class="stat"><span id="s-played">0</span>لعبت</div>
+    <div class="stat"><span id="s-wins">0</span>فزت</div>
+    <div class="stat"><span id="s-streak">0</span>تتالي</div>
+  </div>
+</header>
+
+<div id="message"></div>
+
+<div id="grid"></div>
+<div id="keyboard"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon" id="modal-icon">🏆</div>
+    <h2 id="modal-title">أحسنت!</h2>
+    <p id="modal-msg">وجدت الكلمة!</p>
+    <div class="answer-reveal">
+      <span id="modal-word"></span>
+      <div class="answer-def" id="modal-def"></div>
+    </div>
+    <button class="btn-play-again" onclick="startNewGame()">🔄 العب مجدداً</button>
+  </div>
+</div>
+
+<script>
+// ── WORD BANK ──────────────────────────────────────────────────────────────
+const WORDS = [
+  { word: "كتاب", def: "وعاء للمعرفة والعلم" },
+  { word: "قلوب", def: "جمع قلب، مقر المشاعر" },
+  { word: "نجوم", def: "أجرام سماوية مضيئة" },
+  { word: "سماء", def: "الفضاء الواسع فوقنا" },
+  { word: "بيوت", def: "جمع بيت، مأوى الإنسان" },
+  { word: "شجرة", def: "نبات خشبي كبير" },
+  { word: "مدرس", def: "من يعلّم الطلاب" },
+  { word: "طفلة", def: "أنثى صغيرة في السن" },
+  { word: "حديث", def: "كلام أو قول جديد" },
+  { word: "جميل", def: "ذو منظر حسن" },
+  { word: "صديق", def: "رفيق الإنسان ومؤنسه" },
+  { word: "قصيد", def: "شعر موزون منظم" },
+  { word: "مطبخ", def: "مكان إعداد الطعام" },
+  { word: "فراشة", def: "حشرة ملونة تطير" },
+  { word: "حضارة", def: "بلوغ الإنسان مرتبة رفيعة" },
+  { word: "نهضة", def: "قيام وتقدم بعد تأخر" },
+  { word: "ذهبي", def: "شيء يشبه الذهب لوناً" },
+  { word: "ملوك", def: "جمع ملك، الحاكم المتوّج" },
+  { word: "رحلة", def: "سفر إلى مكان ما" },
+  { word: "ورود", def: "جمع وردة، زهور جميلة" },
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let target, targetDef, grid, currentRow, currentCol, gameOver;
+let stats = JSON.parse(localStorage.getItem('wordle-ar-stats') || '{"played":0,"wins":0,"streak":0}');
+
+// ── KEYBOARD LAYOUT ────────────────────────────────────────────────────────
+const KB_ROWS = [
+  ['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج','د'],
+  ['ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط'],
+  ['DEL','ئ','ء','ؤ','ر','لا','ى','ة','و','ز','ظ','ENTER'],
+];
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+function startNewGame() {
+  document.getElementById('modal').classList.remove('show');
+  const pick = WORDS[Math.floor(Math.random() * WORDS.length)];
+  target = pick.word;
+  targetDef = pick.def;
+
+  // Normalize to array of chars
+  currentRow = 0;
+  currentCol = 0;
+  gameOver = false;
+  grid = Array.from({length: 6}, () => Array(5).fill(''));
+
+  buildGrid();
+  buildKeyboard();
+  updateStats();
+  showMsg('');
+}
+
+function buildGrid() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  for (let r = 0; r < 6; r++) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.id = `row-${r}`;
+    for (let c = 0; c < 5; c++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.id = `tile-${r}-${c}`;
+      row.appendChild(tile);
+    }
+    g.appendChild(row);
+  }
+}
+
+function buildKeyboard() {
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  KB_ROWS.forEach(row => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'kb-row';
+    row.forEach(key => {
+      const btn = document.createElement('button');
+      btn.className = 'key' + (key === 'ENTER' || key === 'DEL' ? ' wide' : '');
+      btn.textContent = key === 'ENTER' ? 'إدخال' : key === 'DEL' ? '⌫' : key;
+      btn.dataset.key = key;
+      btn.onclick = () => handleKey(key);
+      rowEl.appendChild(btn);
+    });
+    kb.appendChild(rowEl);
+  });
+}
+
+// ── INPUT ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { handleKey('ENTER'); return; }
+  if (e.key === 'Backspace') { handleKey('DEL'); return; }
+  // Map physical key to Arabic if needed — just accept direct Arabic input
+  const ar = e.key;
+  if (/^[\u0600-\u06FF]$/.test(ar)) handleKey(ar);
+});
+
+function handleKey(key) {
+  if (gameOver) return;
+  if (key === 'DEL') {
+    deleteLetter();
+  } else if (key === 'ENTER') {
+    submitGuess();
+  } else if (/^[\u0600-\u06FF]$/.test(key) || key === 'لا') {
+    addLetter(key);
+  }
+}
+
+function addLetter(letter) {
+  if (currentCol >= 5) return;
+  grid[currentRow][currentCol] = letter;
+  const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
+  tile.textContent = letter;
+  tile.classList.add('filled');
+  currentCol++;
+}
+
+function deleteLetter() {
+  if (currentCol <= 0) return;
+  currentCol--;
+  grid[currentRow][currentCol] = '';
+  const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
+  tile.textContent = '';
+  tile.classList.remove('filled');
+}
+
+// ── SUBMIT ─────────────────────────────────────────────────────────────────
+function submitGuess() {
+  if (currentCol < 5) {
+    showMsg('أكمل الكلمة! ✍️');
+    shakeRow(currentRow);
+    return;
+  }
+
+  const guess = grid[currentRow].join('');
+  const result = evaluate(guess, target);
+  
+  // Reveal tiles with animation delay
+  for (let c = 0; c < 5; c++) {
+    const tile = document.getElementById(`tile-${currentRow}-${c}`);
+    setTimeout(() => {
+      tile.classList.remove('filled');
+      tile.classList.add(result[c]);
+    }, c * 120);
+  }
+
+  // Update keyboard after reveal
+  setTimeout(() => {
+    updateKeyboard(grid[currentRow], result);
+    
+    if (guess === target) {
+      setTimeout(() => {
+        bounceRow(currentRow);
+        showModal(true);
+        stats.played++; stats.wins++; stats.streak++;
+        saveStats(); updateStats();
+      }, 600);
+      gameOver = true;
+    } else if (currentRow === 5) {
+      setTimeout(() => {
+        showModal(false);
+        stats.played++; stats.streak = 0;
+        saveStats(); updateStats();
+      }, 700);
+      gameOver = true;
+    } else {
+      currentRow++;
+      currentCol = 0;
+      showMsg('');
+    }
+  }, 700);
+}
+
+function evaluate(guess, answer) {
+  const result = Array(5).fill('absent');
+  const ansArr = answer.split('');
+  const guessArr = guess.split('');
+  const used = Array(5).fill(false);
+
+  // First pass: correct
+  for (let i = 0; i < 5; i++) {
+    if (guessArr[i] === ansArr[i]) {
+      result[i] = 'correct';
+      used[i] = true;
+    }
+  }
+
+  // Second pass: present
+  for (let i = 0; i < 5; i++) {
+    if (result[i] === 'correct') continue;
+    for (let j = 0; j < 5; j++) {
+      if (!used[j] && guessArr[i] === ansArr[j]) {
+        result[i] = 'present';
+        used[j] = true;
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+function updateKeyboard(guess, result) {
+  const priority = { correct: 3, present: 2, absent: 1 };
+  guess.forEach((letter, i) => {
+    const btn = document.querySelector(`[data-key="${letter}"]`);
+    if (!btn) return;
+    const current = btn.className.includes('correct') ? 3 : btn.className.includes('present') ? 2 : btn.className.includes('absent') ? 1 : 0;
+    if ((priority[result[i]] || 0) > current) {
+      btn.classList.remove('correct','present','absent');
+      btn.classList.add(result[i]);
+    }
+  });
+}
+
+// ── UI HELPERS ─────────────────────────────────────────────────────────────
+function shakeRow(row) {
+  const tiles = document.querySelectorAll(`#row-${row} .tile`);
+  tiles.forEach(t => { t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake'); });
+}
+
+function bounceRow(row) {
+  const tiles = document.querySelectorAll(`#row-${row} .tile`);
+  tiles.forEach((t, i) => setTimeout(() => { t.classList.add('bounce'); }, i * 80));
+}
+
+let msgTimer;
+function showMsg(msg) {
+  const el = document.getElementById('message');
+  el.textContent = msg;
+  clearTimeout(msgTimer);
+  if (msg) msgTimer = setTimeout(() => el.textContent = '', 2000);
+}
+
+function showModal(won) {
+  document.getElementById('modal-icon').textContent = won ? '🏆' : '😔';
+  document.getElementById('modal-title').textContent = won ? 'أحسنت! 🎉' : 'للأسف...';
+  document.getElementById('modal-msg').textContent = won
+    ? `وجدتها في ${currentRow + 1} ${currentRow === 0 ? 'محاولة واحدة' : 'محاولات'}!`
+    : 'لم تعثر على الكلمة هذه المرة';
+  document.getElementById('modal-word').textContent = target;
+  document.getElementById('modal-def').textContent = targetDef;
+  document.getElementById('modal').classList.add('show');
+}
+
+function updateStats() {
+  document.getElementById('s-played').textContent = stats.played;
+  document.getElementById('s-wins').textContent = stats.wins;
+  document.getElementById('s-streak').textContent = stats.streak;
+}
+
+function saveStats() {
+  localStorage.setItem('wordle-ar-stats', JSON.stringify(stats));
+}
+
+// ── START ──────────────────────────────────────────────────────────────────
+startNewGame();
+</script>
+</body>
+</html>
